@@ -1,4 +1,7 @@
-const { Post } = require("../models/post");
+// controllers/posts.js
+const { default: mongoose } = require("mongoose");
+const Post = require("../models/post");
+const User = require("../models/user");
 
 // Class definition for the PostController
 class PostController {
@@ -32,9 +35,15 @@ class PostController {
         try {
             // Extracting the post ID from the request parameters
             const postId = req.params.id;
+            const postToDelete = await Post.findById(postId);
 
             // Implement deletion logic here
+            if (!postToDelete) return res.status(404).json({ message: "Please select a valid post for deletion"});
 
+
+            await Post.findByIdAndDelete(postId);
+
+            
             // Sending a success response after successful deletion
             res.status(200).json({ message: 'Post deleted successfully' });
         } catch (error) {
@@ -49,11 +58,20 @@ class PostController {
         try {
             // Extracting the post ID from the request parameters
             const postId = req.params.id;
+            const postToUpdate = Post.findById(postId);
+
+            if (!postToUpdate) return res.status(404).json({ message: "Please select a valid post to update"});
 
             // Implement update logic here
+            const { title, description } = req.body;
+
+            await Post.findByIdAndUpdate(postId,{
+                title,
+                description,
+            });
 
             // Sending a success response after successful update
-            res.status(200).json({ message: 'Post updated successfully' });
+            res.status(200).json({ message: 'Post updated successfully'});
         } catch (error) {
             // Logging the error and passing it to the error handling middleware
             console.log(error);
@@ -66,11 +84,14 @@ class PostController {
         try {
             // Extracting the post ID from the request parameters
             const postId = req.params.id;
-
+            
             // Implement retrieval logic here
+            const postToGet = await Post.findById(postId)
+            if (!postToGet) return res.status(404).json({ message: "Post not found"});
 
+           
             // Sending a success response with the retrieved post
-            res.status(200).json({ message: 'Retrieved post by ID' });
+            res.status(200).json({ message: 'Retrieved post by ID', post: postToGet});
         } catch (error) {
             // Logging the error and passing it to the error handling middleware
             console.log(error);
@@ -83,11 +104,14 @@ class PostController {
         try {
             // Extracting the user ID from the request parameters
             const userId = req.params.userId;
+            const user = await User.findById(userId);
 
             // Implement retrieval logic here
+            if (!user) return res.status(404).json({message: "No user or posts found"});
+            const usersPosts = await Post.find({userId: userId});
 
             // Sending a success response with the retrieved posts
-            res.status(200).json({ message: 'Retrieved posts by user ID' });
+            res.status(200).json({ message: 'Retrieved posts by user ID', posts: usersPosts });
         } catch (error) {
             // Logging the error and passing it to the error handling middleware
             console.log(error);

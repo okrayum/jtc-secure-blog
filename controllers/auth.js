@@ -11,6 +11,7 @@ const verifyToken = (req, res, next) => {
     // Extracting the token from the request header
     const authHeader = req.headers.token;
 
+
     // Checking if the token exists in the request header
     if (authHeader) {
         // Splitting the token from the 'Bearer' keyword and extracting the actual token
@@ -18,12 +19,14 @@ const verifyToken = (req, res, next) => {
 
         // Verifying the token using the JWT_SECRET stored in the environment variables
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+
+    
             // Handling errors if the token is not valid
             if (err) res.status(403).json("Token is not valid!");
 
             // Assigning the user object decoded from the token to the request object for further use
             req.user = user;
-
+            
             // Proceeding to the next middleware in the chain
             next();
         });
